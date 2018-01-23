@@ -26,6 +26,17 @@ app.post('/todos',
 					});
 		});
 
+app.get('/todos',
+		(req, res) => {
+			Todo.find()
+				.then(  (todos) => {
+							res.send({ todos });
+						},
+						(error) => {
+							res.status(400).send(error);
+						});
+		});
+
 app.listen(7000,
 			() => {
 				console.log(`Server started and listening on port 7000`);
