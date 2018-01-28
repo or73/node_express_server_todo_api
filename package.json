@@ -23,6 +23,7 @@
     "express": "^4.16.2",
     "jstransformer": "^1.0.0",
     "kerberos": "0.0.23",
+    "lodash": "^4.17.4",
     "mongodb": "^3.0.1",
     "mongodb-core": "^3.0.1",
     "mongoose": "^5.0.1",

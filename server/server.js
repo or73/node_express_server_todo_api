@@ -1,3 +1,4 @@
+const _             = require('lodash');
 const express       = require('express');
 const bodyParser    = require('body-parser');
 const { ObjectID }  = require('mongodb');
@@ -86,6 +87,40 @@ app.delete('/todos/:id',
 						return res.status(400).send(`ERROR: id could not has been deleted: ${ error }`);
 					});
 			});
+
+// UPDATE
+app.patch('/todos/:id',
+			(req, res) => {
+				let id      = req.params.id;
+				let body    = _.pick(req.body,  ['text', 'completed']);
+				
+				if (!ObjectID(id)) {
+					return res.status(404).send('Id not valid');
+				}
+				
+				if (_.isBoolean(body.completed) && body.completed) {
+					body.completedAt    = new Date().getTime();
+				} else {
+					body.completed      = false;
+					body.completedAt    = null;
+				}
+				
+				Todo.findByIdAndUpdate(id,
+										{ $set: body },
+										{ new: true })
+					.then((todo) => {
+						if (!todo) {
+							return res.status(404).send(`todo does not exist`);
+						}
+						
+						res.send(`${ JSON.stringify(todo,  undefined, 2) }`);
+					}, (error) => {
+						res.status(400).send(`ERROR1: todo could not been updated: ${ error }`);
+					}).catch((error) => {
+						res.status(400).send(`ERROR2: todo could not been updated: ${ error }`);
+					});
+			});
+
 app.post('/users',
 		(req, res) => {
 			//console.log(`request: ${ JSON.stringify(req.body) }`);
