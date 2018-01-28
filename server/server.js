@@ -63,6 +63,29 @@ app.get('/todos/:id',
 					// 400 - and send empty body back
 		});
 
+// DELETE
+app.delete('/todos/:id',
+			(req, res) => {
+				// get the id
+				let id  = req.params.id;
+				// validate the id -> not valid? return 404
+				if (!ObjectID.isValid(id)) {
+					return res.status(404).send('Id not valid');
+				}
+				
+				Todo.findByIdAndRemove(id)   // remove todo by id
+					.then( (todo) => {
+						if (!todo) {    // if no doc, send 404
+							return res.status(404).send('Id has hot been found');
+						}
+						
+						res.status(200).send(`Id has been deleted: ${ todo }`); // id doc, send 200
+						// error
+						// 400 with empty body
+					}, (error) => {
+						return res.status(400).send(`ERROR: id could not has been deleted: ${ error }`);
+					});
+			});
 app.post('/users',
 		(req, res) => {
 			//console.log(`request: ${ JSON.stringify(req.body) }`);
