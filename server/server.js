@@ -80,7 +80,7 @@ app.delete('/todos/:id',
 							return res.status(404).send('Id has hot been found');
 						}
 						
-						res.status(200).send(`Id has been deleted: ${ todo }`); // id doc, send 200
+						res.status(200).send({ todo }); // id doc, send 200
 						// error
 						// 400 with empty body
 					}, (error) => {
@@ -113,7 +113,7 @@ app.patch('/todos/:id',
 							return res.status(404).send(`todo does not exist`);
 						}
 						
-						res.send(`${ JSON.stringify(todo,  undefined, 2) }`);
+						res.send({ todo });
 					}, (error) => {
 						res.status(400).send(`ERROR1: todo could not been updated: ${ error }`);
 					}).catch((error) => {
