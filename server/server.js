@@ -37,6 +37,33 @@ app.get('/todos',
 						});
 		});
 
+app.post('/users',
+	(req, res) => {
+		//console.log(`request: ${ JSON.stringify(req.body) }`);
+		let user    = new User({
+			name: req.body.name,
+			email: req.body.email
+		});
+		user.save()
+			.then((doc) => {
+					res.send(doc);
+				},
+				(err) => {
+					res.status(400).send(err);
+				});
+	});
+
+app.get('/users',
+	(req, res) => {
+		User.find()
+			.then(  (users) => {
+					res.send({ users });
+				},
+				(error) => {
+					res.status(400).send(error);
+				});
+	});
+
 app.listen(7000,
 			() => {
 				console.log(`Server started and listening on port 7000`);
@@ -49,8 +76,8 @@ app.listen(7000,
 // 	completedAt: 10
 // });
 //
-// let newUser = new User({
-// 	name: 'OR73',
+//  let newUser = new User({
+//  	name: 'OR73',
 // 	email: 'oreyesc@gmail.com'
 // });
 //
@@ -70,4 +97,4 @@ app.listen(7000,
 // 			(error) => {
 // 							console.log(`ERROR: Unable to save user: ${ error }`);
 // 						});
-module.exports  = { app }
+module.exports  = { app };
