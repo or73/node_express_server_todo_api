@@ -9,7 +9,7 @@ const   portDB        = 27017,      // DB port
 // mongodb://user:pass@localhost:port/database
 
 mongoose.Promise    = global.Promise;       // add a Promise
-mongoose.connect(`${ url }`);  // connect to DB
+mongoose.connect(process.env.MONGODB_URI || `${ url }`);  // connect to DB
 
 
 
