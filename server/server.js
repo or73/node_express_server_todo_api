@@ -56,7 +56,7 @@ app.get('/todos/:id',
 									res.send({ todo }); // if todo - send it back
 								},
 						(error) => { // error
-										res.status(400).send('Id not found');  // 404 - send back empty send
+										res.status(400).send(`Id not found: ${ error }`);  // 404 - send back empty send
 									});
 				// error
 					// 400 - and send empty body back
