@@ -4,6 +4,7 @@ const _             = require('lodash');
 const express       = require('express');
 const bodyParser    = require('body-parser');
 const { ObjectID }  = require('mongodb');
+const jwt           = require('jsonwebtoken');
 
 const { mongoose }  = require('./db/mongoose');
 const { Todo }      = require('./models/todo');
@@ -126,17 +127,21 @@ app.patch('/todos/:id',
 app.post('/users',
 		(req, res) => {
 			//console.log(`request: ${ JSON.stringify(req.body) }`);
-			let user    = new User({
-				name: req.body.name,
-				email: req.body.email
-			});
+			let body    = _.pick(req.body, [ 'name', 'email', 'password' ]);
+			
+			let user    = new User(body);
+			
 			user.save()
-				.then((doc) => {
-						res.send(doc);
-					},
-					(err) => {
-						res.status(400).send(err);
-					});
+				.then(() => {
+							return user.generateAuthToken();
+							//res.send(user);
+						}, (err) => {
+							res.status(400).send(err);
+						})
+				.then((token) => {
+						res.header('x-auth', token).send(user);
+					})
+				.catch((e) => res.status(400).send(e));
 		});
 
 app.get('/users',
