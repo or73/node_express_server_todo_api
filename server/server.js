@@ -19,23 +19,27 @@ const port  = process.env.PORT || 7000;
 app.use(bodyParser.json());
 
 app.post('/todos',
+		authenticate,
 		(req, res) => {
 			//console.log(`request: ${ JSON.stringify(req.body) }`);
 			let todo    = new Todo({
-				text: req.body.text
+				text: req.body.text,
+				_creator: req.user._id
 			});
 			todo.save()
 				.then((doc) => {
 						res.send(doc);
-					},
-					(err) => {
+					}, (err) => {
 						res.status(400).send(err);
 					});
 		});
 
 app.get('/todos',
+		authenticate,
 		(req, res) => {
-			Todo.find()
+			Todo.find({
+				_creator: req.user._id
+				})
 				.then(  (todos) => {
 							res.send({ todos });
 						},
@@ -46,6 +50,7 @@ app.get('/todos',
 
 // GET /todos/123456
 app.get('/todos/:id',
+		authenticate,
 		(req, res) => {
 			let id  = req.params.id;
 			
@@ -53,7 +58,10 @@ app.get('/todos/:id',
 				return res.status(400).send('Id not valid');  // 404 - send back empty send
 			}
 			
-			Todo.findById(id)   // find ById
+			Todo.findOne({
+					_id: id,
+					_creator: req.user._id
+				})   // find ById
 				.then(  (todo) => { // success
 									if (!todo) { // if !todo - send back 404 with empty body
 										return res.status(404).send('Id has not been found');
@@ -69,32 +77,30 @@ app.get('/todos/:id',
 		});
 
 // DELETE
-app.delete('/todos/:id',
-			(req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
 				// get the id
 				let id  = req.params.id;
 				// validate the id -> not valid? return 404
 				if (!ObjectID.isValid(id)) {
-					return res.status(404).send('Id not valid');
+					return res.status(404).send();
 				}
 				
-				Todo.findByIdAndRemove(id)   // remove todo by id
-					.then( (todo) => {
+				Todo.findOneAndRemove({ // remove todo by id
+						_id: id,
+						_creator: req.user._id
+					}).then( (todo) => {
 						if (!todo) {    // if no doc, send 404
-							return res.status(404).send('Id has hot been found');
+							return res.status(404).send();
 						}
 						
-						res.status(200).send({ todo }); // id doc, send 200
-						// error
-						// 400 with empty body
-					}, (error) => {
-						return res.status(400).send(`ERROR: id could not has been deleted: ${ error }`);
-					});
+						res.send({ todo }); // id doc, send 200
+					}).catch((e) => {   // error
+						res.status(400).send(); // 400 with empty body
+				});
 			});
 
 // UPDATE
-app.patch('/todos/:id',
-			(req, res) => {
+app.patch('/todos/:id', authenticate, (req, res) => {
 				let id      = req.params.id;
 				let body    = _.pick(req.body,  ['text', 'completed']);
 				
@@ -109,7 +115,7 @@ app.patch('/todos/:id',
 					body.completedAt    = null;
 				}
 				
-				Todo.findByIdAndUpdate(id,
+				Todo.findOneAndUpdate({ _id: id,  _creator: req.user._id },
 										{ $set: body },
 										{ new: true })
 					.then((todo) => {
