@@ -1,14 +1,14 @@
 require('./config/config');
 
-const _             = require('lodash');
-const express       = require('express');
-const bodyParser    = require('body-parser');
-const { ObjectID }  = require('mongodb');
-const jwt           = require('jsonwebtoken');
+const _                 = require('lodash');
+const express           = require('express');
+const bodyParser        = require('body-parser');
+const { ObjectID }      = require('mongodb');
+const jwt               = require('jsonwebtoken');
 
-const { mongoose }  = require('./db/mongoose');
-const { Todo }      = require('./models/todo');
-const { User }      = require('./models/user');
+const { mongoose }      = require('./db/mongoose');
+const { Todo }          = require('./models/todo');
+const { User }          = require('./models/user');
 const { authenticate }  = require('./middleware/authenticate');
 // mongodb://user:pass@localhost:port/database
 
@@ -129,15 +129,11 @@ app.post('/users',
 		(req, res) => {
 			//console.log(`request: ${ JSON.stringify(req.body) }`);
 			let body    = _.pick(req.body, [ 'name', 'email', 'password' ]);
-			
 			let user    = new User(body);
 			
 			user.save()
 				.then(() => {
 							return user.generateAuthToken();
-							//res.send(user);
-						}, (err) => {
-							res.status(400).send(err);
 						})
 				.then((token) => {
 						res.header('x-auth', token).send(user);

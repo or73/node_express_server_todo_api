@@ -52,7 +52,7 @@ UserSchema.methods.toJSON   = function () {
 UserSchema.methods.generateAuthToken    = function () {
 	let user    = this;
 	let access  = 'auth';
-	let token   = jwt.sign({ _id: user._id.toHexString(), access}, 'abc123').toString();
+	let token   = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123').toString();
 	
 	user.tokens.push({ access, token });
 	
@@ -66,7 +66,6 @@ UserSchema.statics.findByToken  = function (token) {
 	try {
 		decoded = jwt.verify(token,  'abc123');
 	} catch (e) {
-		console.log(`ERROR: ${ e }`);
 		return Promise.reject();
 	}
 	
@@ -85,14 +84,14 @@ UserSchema.pre('save',
 					// validate if password has been modified
 					if (user.isModified('password')) {
 						bcrypt.genSalt(10,
-							(err, salt) => {
-								bcrypt.hash(user.password,
-									salt,
-									(err, hash) => {
-										user.password   = hash;
-										next();
-									})
-							});
+										(err, salt) => {
+														bcrypt.hash(user.password,
+																	salt,
+																	(err, hash) => {
+																		user.password   = hash;
+																		next();
+																	})
+										}               );
 					} else {
 						next();
 					}
